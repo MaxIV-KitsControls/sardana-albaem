@@ -241,7 +241,7 @@ class AlbaemCoTiCtrl(CounterTimerController):
             self._log.debug('Wrong state: %s', state)
 
     def GetAxisExtraPar(self, axis, name):
-        self._log.debug("GetExtraAttributePar(%d, %s): Entering...",
+        self._log.debug("GetAxisExtraPar(%d, %s): Entering...",
                         axis, name)
         if name.lower() == "range":
             self.ranges[axis-2] = self.AemDevice['Ranges'].value[axis-2]

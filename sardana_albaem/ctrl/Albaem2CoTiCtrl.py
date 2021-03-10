@@ -248,8 +248,8 @@ class Albaem2CoTiCtrl(CounterTimerController):
 #                Axis Extra Attribute Methods
 ###############################################################################
 
-    def GetExtraAttributePar(self, axis, name):
-        self._log.debug("GetExtraAttributePar(%d, %s): Entering...", axis,
+    def GetAxisExtraPar(self, axis, name):
+        self._log.debug("GetAxisExtraPar(%d, %s): Entering...", axis,
                         name)
         if axis == 1:
             raise ValueError('The axis 1 does not use the extra attributes')
@@ -264,7 +264,7 @@ class Albaem2CoTiCtrl(CounterTimerController):
             return self._em2[axis].current
 
 
-    def SetExtraAttributePar(self, axis, name, value):
+    def SetAxisExtraPar(self, axis, name, value):
         if axis == 1:
             raise ValueError('The axis 1 does not use the extra attributes')
 
