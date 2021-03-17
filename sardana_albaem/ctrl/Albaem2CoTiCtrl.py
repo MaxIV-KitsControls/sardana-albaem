@@ -258,7 +258,7 @@ class Albaem2CoTiCtrl(CounterTimerController):
             raise ValueError('The axis 1 does not use the extra attributes')
 
         name = name.lower()
-        axis -= 1
+        axis -= 2
         if name == "range":
             return self._em2[axis].range
         elif name == 'inversion':
@@ -272,7 +272,7 @@ class Albaem2CoTiCtrl(CounterTimerController):
             raise ValueError('The axis 1 does not use the extra attributes')
 
         name = name.lower()
-        axis -= 1
+        axis -= 2
         if name == "range":
             self._em2[axis].range = value
         elif name == 'inversion':
