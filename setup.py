@@ -43,8 +43,7 @@ def main():
 
     packages = find_packages()
 
-    # Add your dependencies in the following line.
-    install_requires = ['sardana', 'sockio']
+    install_requires = ['sockio']
 
     python_requires = '>=2.7'
 
