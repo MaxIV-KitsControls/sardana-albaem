@@ -236,9 +236,14 @@ class Albaem2CoTiCtrl(CounterTimerController):
         channel = 'CHAN0{0}'.format(axis)
         values = list(self._new_data[channel])
 
+
         if self._synchronization in [AcqSynch.SoftwareTrigger,
-                                     AcqSynch.SoftwareGate]:
-            return SardanaValue(values[0])
+                                AcqSynch.SoftwareGate]:
+            # Fix issue with the electromether (EL-15157)  pow(2, np.log2(np.ceil(int_time/2.61)))
+            factor = pow(2,int.bit_length(int(self._acq_time/2.621441)))
+            self._log.debug('ReadOne value: {}, tune {}'.format(values[0], factor))
+            return SardanaValue(values[0] * factor)
+
         else:
             self._new_data[channel] = []
             return values
