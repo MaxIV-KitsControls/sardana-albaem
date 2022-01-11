@@ -112,6 +112,7 @@ class Em2(object):
         self.host = host
         self.port = port
         self._sock = TCP(host, port)
+        self._read_index_bug = None
         # TODO: Remove when sardana allows to use the configuration file
         logging.getLogger('sockio').setLevel(logging.INFO)
         self.log = logging.getLogger('em2.Em2({0}:{1})'.format(host, port))
