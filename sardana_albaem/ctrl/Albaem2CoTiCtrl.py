@@ -244,13 +244,14 @@ class Albaem2CoTiCtrl(CounterTimerController):
 
     def ReadOne(self, axis):
         # self._log.debug("ReadOne(%d): Entering...", axis)
-        if len(self.new_data) == 0:
-            return []
-
         if self._synchronization in [AcqSynch.SoftwareTrigger,
                                      AcqSynch.SoftwareGate]:
+            if len(self.new_data) == 0:
+                return None
             return SardanaValue(self.new_data[axis - 1][0])
         else:
+            if len(self.new_data) == 0:
+                return []
             val = self.new_data[axis - 1]
             return val
 
