@@ -90,12 +90,11 @@ class Albaem2CoTiCtrl(CounterTimerController):
             raise ValueError("software version format must be (x, y, z)")
         self._synchronization = AcqSynch.SoftwareTrigger
         self._latency_time = 0.001  # In fact, it is just 320us
-        self._skipp_start = False
-        self._aborted_flg = False
-        self._started_flg = False
-        self._points_read_per_start = 0
-        self._nb_points_per_start = 0
-        self._last_index_point = 0
+        self._use_sw_trigger = True
+        self._aborted = False
+        self._nb_points_read_per_start = 0
+        self._nb_points_expected_per_start = 0
+        self._nb_points_fetched = 0
         self._new_data = {}
         self._nb_start = 0
         self._state = State.On
@@ -108,14 +107,12 @@ class Albaem2CoTiCtrl(CounterTimerController):
         if status in ['ACQUIRING', 'RUNNING']:
             self._em2.stop_acquisition()
 
-        self._skipp_start = False
-        self._last_index_point = 0
+        self._use_sw_trigger = True
         self._new_data = {}
-        self._aborted_flg = False
-        self._started_flg = False
-        self._nb_points = 0
-        self._points_read_per_start = 0
-        self._nb_points_per_start = 0
+        self._aborted = False
+        self._nb_points_fetched = 0
+        self._nb_points_read_per_start = 0
+        self._nb_points_expected_per_start = 0
 
     def axis_channel(self, axis):
         """Return EM2 Channel object for the given controller axis"""
@@ -123,26 +120,25 @@ class Albaem2CoTiCtrl(CounterTimerController):
 
     def StateAll(self):
         """Read state of all axis."""
-        status = self._em2.acquisition_state
-        self._log.debug('StateAll() HW status %s', status)
-        allowed_states = ['ACQUIRING', 'RUNNING', 'ON',
-                          'FAULT']
-        if status == 'FAULT' or status not in allowed_states:
+        hardware_state = self._em2.acquisition_state
+        self._log.debug('HW status %s', hardware_state)
+
+        allowed_states = ['ACQUIRING', 'RUNNING', 'ON', 'FAULT']
+        if hardware_state == 'FAULT' or hardware_state not in allowed_states:
             self._state = State.Fault
-            self._status = status
+            self._status = hardware_state
             return
 
-        # The state depends of the number of point read per start
-        read_ready = self._points_read_per_start == self._nb_points_per_start
-        if read_ready or self._aborted_flg:
+        read_ready = self._nb_points_read_per_start == self._nb_points_expected_per_start
+        if read_ready or self._aborted:
             self._state = State.On
             self._status = 'ON'
         else:
             self._state = State.Moving
             self._status = 'MOVING'
-            if status == 'ON':
+            if hardware_state == 'ON':
+                self._log.warning('Data not ready, but HW status is ON - forcing ReadAll')
                 self.ReadAll()
-                self._log.warning('Data not ready and state is ON')
 
     def StateOne(self, axis):
         """Read state of one axis."""
@@ -167,14 +163,18 @@ class Albaem2CoTiCtrl(CounterTimerController):
 
         if self._synchronization in [AcqSynch.SoftwareGate,
                                      AcqSynch.SoftwareTrigger]:
-
             mode = 'SOFTWARE'
+            self._use_sw_trigger = True
         elif self._synchronization == AcqSynch.HardwareTrigger:
             mode = 'HARDWARE'
-            self._skipp_start = True
+            self._use_sw_trigger = False
         elif self._synchronization == AcqSynch.HardwareGate:
             mode = 'GATE'
-            self._skipp_start = True
+            self._use_sw_trigger = False
+        else:
+            raise ValueError(
+                'Unsupported synchronization mode: {0}'.format(self._synchronization)
+            )
 
         # Configure the electrometer
         self._em2.acquisition_time = self._acq_time
@@ -200,15 +200,9 @@ class Albaem2CoTiCtrl(CounterTimerController):
         return True
 
     def StartAll(self):
-        """
-        Starting the acquisition is done only if before was called
-        PreStartOneCT for master channel.
-        """
-        self._points_read_per_start = 0
-        if self._skipp_start:
-            return
-
-        self._em2.software_trigger()
+        self._nb_points_read_per_start = 0
+        if self._use_sw_trigger:
+            self._em2.software_trigger()
 
     def ReadAll(self):
         # TODO Change the ACQU:MEAS command by CHAN:CURR
