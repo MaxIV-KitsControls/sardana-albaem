@@ -156,7 +156,7 @@ class Albaem2CoTiCtrl(CounterTimerController):
             raise ValueError('The Start synchronization is not allowed yet')
 
         self._clean_variables()
-        self._nb_points_per_start = repetitions
+        self._nb_points_expected_per_start = repetitions
         nb_points = repetitions * nb_starts
         self._acq_time = value
         latency_time = latency
@@ -208,11 +208,11 @@ class Albaem2CoTiCtrl(CounterTimerController):
 
     def ReadAll(self):
         # TODO Change the ACQU:MEAS command by CHAN:CURR
-        data_ready = self._em2.nb_points_ready
-        if self._last_index_point < data_ready:
-            data_len = data_ready - self._last_index_point
-            self._points_read_per_start += data_len
-            self._new_data = self._em2.read(self._last_index_point, data_len)
+        nb_points_ready = self._em2.nb_points_ready
+        if self._nb_points_fetched < nb_points_ready:
+            data_len = nb_points_ready - self._nb_points_fetched
+            self._nb_points_read_per_start += data_len
+            self._new_data = self._em2.read(self._nb_points_fetched, data_len)
             try:
                 for axis in range(1, 5):
                     formula = self.formulas[axis]
@@ -224,7 +224,7 @@ class Albaem2CoTiCtrl(CounterTimerController):
                         self._new_data[channel] = values
 
                 self._new_data['CHAN00'] = [self._acq_time] * data_len
-                self._last_index_point = data_ready
+                self._nb_points_fetched = nb_points_ready
             except Exception as e:
                 raise Exception('ReadAll error: {0}'.format(e))
 
@@ -252,8 +252,8 @@ class Albaem2CoTiCtrl(CounterTimerController):
             return values
 
     def AbortOne(self, axis):
-        if not self._aborted_flg:
-            self._aborted_flg = True
+        if not self._aborted:
+            self._aborted = True
             self._em2.stop_acquisition()
 
 ###############################################################################
