@@ -84,6 +84,10 @@ class Albaem2CoTiCtrl(CounterTimerController):
         self._log.debug(msg)
 
         self._em2 = Em2(self.AlbaEmHost, self.Port)
+        self._em2_software_version = self._em2.software_version
+        if (not isinstance(self._em2_software_version, tuple) 
+                or len(self._em2_software_version) != 3):
+            raise ValueError("software version format must be (x, y, z)")
         self._synchronization = AcqSynch.SoftwareTrigger
         self._latency_time = 0.001  # In fact, it is just 320us
         self._skipp_start = False
@@ -240,7 +244,10 @@ class Albaem2CoTiCtrl(CounterTimerController):
         if self._synchronization in [AcqSynch.SoftwareTrigger,
                                 AcqSynch.SoftwareGate]:
             # Fix issue with the electromether (EL-15157)  pow(2, np.log2(np.ceil(int_time/2.61)))
-            factor = pow(2,int.bit_length(int(self._acq_time/2.621441)))
+            if self._em2_software_version >= (2, 0, 0) and self._em2_software_version < (2, 1, 0):
+                factor = pow(2,int.bit_length(int(self._acq_time/2.621441)))
+            else:
+                factor = 1
             self._log.debug('ReadOne value: {}, tune {}'.format(values[0], factor))
             return SardanaValue(values[0] * factor)
 
