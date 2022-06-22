@@ -61,12 +61,15 @@ class em_autorange(Macro):
                   None, 'List of [channels, inversion]'] ]
 
     def run(self, chns):
+        msg = ''
         for ch, enabled in chns:
             old_state = ch.read_attribute('Autorange').value
             ch.write_attribute('Autorange', enabled)
             new_state = ch.read_attribute('Autorange').value
-            self.output('{0} changed autorange from {1} '
-                        'to {2}'.format(ch, old_state, new_state))
+            msg += '{0} changed autorange from {1} ' \
+                   'to {2}\n'.format(ch, old_state, new_state)
+
+        self.output(msg)
 
 
 class em_findrange(Macro):
@@ -83,9 +86,9 @@ class em_findrange(Macro):
     def run(self, chns, wait_time):
         chns_enabled = [[chn, True] for chn in chns]
         chns_desabled = [[chn, False] for chn in chns]
-        self.em_autorange(chns_enabled)
-        t1 = time.time()
         try:
+            self.em_autorange(chns_enabled)
+            t1 = time.time()
             while time.time()-t1 < wait_time:
                 self.checkPoint()
                 time.sleep(0.01)
