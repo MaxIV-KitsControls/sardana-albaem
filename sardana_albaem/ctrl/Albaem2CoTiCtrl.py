@@ -53,14 +53,16 @@ class Albaem2CoTiCtrl(CounterTimerController):
             Description: 'AlbaEm streaming port (ZMQ)',
             Type: int,
             DefaultValue: ZMQ_STREAMING_PORT
-        },
-        'ExtTriggerInput': {
-            Description: 'ExtTriggerInput',
-            Type: str
-        },
+        }
     }
 
     ctrl_attributes = {
+        'ExtTriggerInput': {
+            Description: 'ExtTriggerInput',
+            Type: str,
+            Access: DataAccess.ReadWrite,
+            Memorize: Memorized
+        },
         'AcquisitionMode': {
             Type: str,
             Description: 'Acquisition Mode: CHARGE, CURRENT, STREAMING',
@@ -257,6 +259,7 @@ class Albaem2CoTiCtrl(CounterTimerController):
     @debug_it
     def ReadOne(self, axis):
         if len(self._new_data) == 0:
+            # TODO: Check with hardaware synchronization
             if self._synchronization in [AcqSynch.SoftwareTrigger,
                                          AcqSynch.SoftwareGate]:
                 return None
@@ -286,6 +289,8 @@ class Albaem2CoTiCtrl(CounterTimerController):
 
     @debug_it
     def GetAxisExtraPar(self, axis, name):
+        self._log.debug("GetExtraAttributePar(%d, %s): Entering...", axis,
+                        name)
         if axis == 1:
             raise ValueError('The axis 1 does not use the extra attributes')
 

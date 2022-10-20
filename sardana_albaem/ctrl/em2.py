@@ -125,7 +125,8 @@ class AcquisitionData(object):
 # TODO: Remove old style class implementation when we go to py3
 class Em2(object):
 
-    def __init__(self, host, port=SCPI_CONTROL_PORT, zmq_port=ZMQ_STREAMING_PORT):
+    def __init__(self, host, port=SCPI_CONTROL_PORT,
+                 zmq_port=ZMQ_STREAMING_PORT):
         self.host = host
         self.port = port
         self._sock = TCP(host, port)
