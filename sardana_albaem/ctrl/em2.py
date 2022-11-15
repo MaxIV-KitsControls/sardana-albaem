@@ -290,6 +290,14 @@ class Em2(object):
     def timestamp_data(self, value):
         self.command('TMST {0}'.format('True' if value else 'False'))
 
+    @property
+    def lowtime(self):
+        return float(self.command('ACQU:LOWT?')) * 1E-3
+
+    @lowtime.setter
+    def lowtime(self, value):
+        return self.command('ACQU:LOWT {0}'.format(value*1E3))
+
     def start_acquisition(self, soft_trigger=True):
         if self.zmq_streaming_required and self.zmq_streaming_supported:
             self._zmq_receiver.start()
