@@ -273,8 +273,7 @@ class Albaem2CoTiCtrl(CounterTimerController):
         values = list(self._new_data[channel])
 
         if self._synchronization in [AcqSynch.SoftwareTrigger,
-                                     AcqSynch.SoftwareGate,
-                                     AcqSynch.SoftwareStart]:
+                                     AcqSynch.SoftwareGate]:
             return SardanaValue(values[0])
 
         else:
