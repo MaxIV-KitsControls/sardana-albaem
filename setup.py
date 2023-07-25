@@ -50,8 +50,6 @@ def main():
 
     setup(
         name=name,
-        use_scm_version=True,
-        setup_requires=["setuptools_scm"],
         description=description,
         author=author,
         author_email=author_email,
