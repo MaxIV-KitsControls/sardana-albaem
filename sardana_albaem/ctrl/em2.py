@@ -32,6 +32,7 @@ ZMQ_STREAMING_PORT = 22003
 ZMQ_READ_TIMEOUT_MS = 50
 ZMQ_RECEIVER_MAX_MESSAGES_IN_FLIGHT = 1000000
 
+CONNECTION_TIMEOUT = 5
 CHANNEL_MIN = 1
 CHANNEL_MAX = 4
 
@@ -129,7 +130,7 @@ class Em2(object):
                  zmq_port=ZMQ_STREAMING_PORT):
         self.host = host
         self.port = port
-        self._sock = TCP(host, port)
+        self._sock = TCP(host, port, connection_timeout=CONNECTION_TIMEOUT)
         self._zmq_receiver = ZmqStreamReceiver(host, zmq_port)
         # TODO: Remove when sardana allows to use the configuration file
         logging.getLogger('sockio').setLevel(logging.INFO)
