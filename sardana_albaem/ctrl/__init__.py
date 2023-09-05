@@ -23,4 +23,3 @@
 
 __author__ = "kits"
 __email__ = "kitscontrols@maxiv.lu.se"
-__version__ = '0.0.0'

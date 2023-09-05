@@ -26,6 +26,8 @@ def main():
     """Main method collecting all the parameters to setup."""
     name = "sardana-albaem"
 
+    version = "0.0.15"
+
     description = "AlbaEM Sardana Controller"
 
     author = "kits"
@@ -50,6 +52,7 @@ def main():
 
     setup(
         name=name,
+        version=version,
         description=description,
         author=author,
         author_email=author_email,
