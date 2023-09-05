@@ -26,7 +26,7 @@ def main():
     """Main method collecting all the parameters to setup."""
     name = "sardana-albaem"
 
-    version = "0.0.15"
+    version = "0.0.16"
 
     description = "AlbaEM Sardana Controller"
 
