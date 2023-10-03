@@ -22,18 +22,45 @@ class em_range(Macro):
     enabled_output = True
 
     def run(self, chns):
+        old_range = {}
+        to_check = set()
+        lower_ranges = list(map(str.lower, RANGES))
         for ch, rg in chns:
-            old_range = ch.read_attribute("Range").value
+            if rg.lower() not in lower_ranges:
+                if self.enabled_output:
+                    self.error('Skip {} wrong range {}'.format(ch, rg))
+                continue
+            old_range[ch] = ch.read_attribute("Range").value
             ch.write_attribute("Range", rg)
-            new_range = ch.read_attribute("Range").value
-            if self.enabled_output:
-                self.output('%s changed range from %s to %s' % (ch, old_range,
-                                                                new_range))
+            to_check.add(ch.name)
 
+        if not to_check:
+            return
+
+        if self.enabled_output:
+            self.info('Waiting for changes')
+        # Albaem2 take more time to change/update the range.
+        t1 = time.time()
+        while to_check:
+            for ch, rg in chns:
+                if ch.name not in to_check:
+                    continue
+                new_value = ch.read_attribute("Range").value
+                if rg.lower() == new_value.lower():
+                    to_check.remove(ch.name)
+                    msg = '{} changed range from {} to {}' \
+                          ''.format(ch, old_range[ch], new_value)
+                    if self.enabled_output:
+                        self.output(msg)
+            time.sleep(0.1)
+            if to_check and time.time() - t1 > 5:
+                if self.enabled_output:
+                    self.error('Can not check all elements')
+                break
 
 class em_inversion(Macro):
     """
-        Macro to change the the polarity.
+        Macro to change the polarity.
     """
     param_def = [['chns',
                   [['ch', Type.CTExpChannel, None, 'electrometer chn'],
